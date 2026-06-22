@@ -119,10 +119,10 @@ ip route 10.11.85.32 255.255.255.224 10.11.85.106
 ```
 hostname HUB
 !
-interface Ethernet0/0
+interface Ethernet0/1
  ip address 10.11.85.98 255.255.255.252
  no shutdown
-interface Ethernet0/1
+interface Ethernet0/0
  ip address 10.11.85.65 255.255.255.224
  no shutdown
 !
@@ -134,7 +134,7 @@ crypto isakmp policy 10
  authentication pre-share
  group 14
  lifetime 86400
-crypto isakmp key ITLA2024 address 0.0.0.0 0.0.0.0
+crypto isakmp key ITLA2026 address 0.0.0.0 0.0.0.0
 !
 crypto ipsec transform-set TS-DMVPN esp-aes 256 esp-sha256-hmac
  mode transport
@@ -184,7 +184,7 @@ crypto isakmp policy 10
  authentication pre-share
  group 14
  lifetime 86400
-crypto isakmp key ITLA2024 address 0.0.0.0 0.0.0.0
+crypto isakmp key ITLA2026 address 0.0.0.0 0.0.0.0
 !
 crypto ipsec transform-set TS-DMVPN esp-aes 256 esp-sha256-hmac
  mode transport
@@ -234,7 +234,7 @@ crypto isakmp policy 10
  authentication pre-share
  group 14
  lifetime 86400
-crypto isakmp key ITLA2024 address 0.0.0.0 0.0.0.0
+crypto isakmp key ITLA2026 address 0.0.0.0 0.0.0.0
 !
 crypto ipsec transform-set TS-DMVPN esp-aes 256 esp-sha256-hmac
  mode transport
