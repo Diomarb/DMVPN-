@@ -1,0 +1,297 @@
+
+
+============================================================
+HUB
+
+enable
+configure terminal
+
+hostname HUB1
+
+interface Ethernet0/1
+ description WAN hacia ISP
+ ip address 10.11.85.98 255.255.255.252
+ no shutdown
+
+interface Ethernet0/0
+ description LAN hacia PC3
+ ip address 10.11.85.65 255.255.255.224
+ no shutdown
+
+
+ip route 0.0.0.0 0.0.0.0 10.11.85.97
+
+
+crypto ikev2 proposal PROP-DMVPN
+ encryption aes-cbc-256
+ integrity sha256
+ group 14
+
+
+
+crypto ikev2 policy POL-DMVPN
+ proposal PROP-DMVPN
+
+
+crypto ikev2 keyring KR-DMVPN
+ peer ANY-SPOKE
+  address 0.0.0.0 0.0.0.0
+  pre-shared-key ITLA2026
+ !
+
+
+crypto ikev2 profile PROF-DMVPN-IKEV2
+ match identity remote address 0.0.0.0
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local KR-DMVPN
+
+crypto ipsec transform-set TS-DMVPN-IKEV2 esp-aes 256 esp-sha256-hmac
+ mode transport
+
+crypto ipsec profile PROF-DMVPN-VTI
+ set transform-set TS-DMVPN-IKEV2
+ set ikev2-profile PROF-DMVPN-IKEV2
+
+interface Tunnel0
+ description DMVPN Fase3 - Hub
+ ip address 10.10.10.1 255.255.255.224
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication ITLA-DMVPN
+ ip nhrp map multicast dynamic
+ ip nhrp network-id 85185
+ ip nhrp holdtime 300
+ ip nhrp redirect
+ no ip split-horizon eigrp 1
+ no ip next-hop-self eigrp 1
+ tunnel source Ethernet0/1
+ tunnel mode gre multipoint
+ tunnel key 85185
+ tunnel protection ipsec profile PROF-DMVPN-VTI
+ no shutdown
+
+
+router eigrp 1
+ no auto-summary
+ network 10.10.10.0 0.0.0.31
+ network 10.11.85.64 0.0.0.31
+
+end
+
+ ============================================================
+ SPOKE1 
+
+enable
+configure terminal
+
+hostname SPOKE1
+
+
+interface Ethernet0/0
+ description WAN hacia ISP
+ ip address 10.11.85.102 255.255.255.252
+ no shutdown
+
+interface Ethernet0/1
+ description LAN hacia PC2
+ ip address 10.11.85.1 255.255.255.224
+ no shutdown
+
+
+ip route 0.0.0.0 0.0.0.0 10.11.85.101
+
+
+
+crypto ikev2 proposal PROP-DMVPN
+ encryption aes-cbc-256
+ integrity sha256
+ group 14
+
+
+
+crypto ikev2 policy POL-DMVPN
+ proposal PROP-DMVPN
+
+
+
+crypto ikev2 keyring KR-DMVPN
+ peer HUB
+  address 10.11.85.98
+  pre-shared-key ITLA2026
+ !
+
+
+
+crypto ikev2 profile PROF-DMVPN-IKEV2
+ match identity remote address 10.11.85.98 255.255.255.255
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local KR-DMVPN
+
+
+crypto ipsec transform-set TS-DMVPN-IKEV2 esp-aes 256 esp-sha256-hmac
+ mode transport
+
+
+
+crypto ipsec profile PROF-DMVPN-VTI
+ set transform-set TS-DMVPN-IKEV2
+ set ikev2-profile PROF-DMVPN-IKEV2
+
+
+interface Tunnel0
+ description DMVPN Fase3 - Spoke1
+ ip address 10.10.10.2 255.255.255.224
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication ITLA-DMVPN
+ ip nhrp map 10.10.10.1 10.11.85.98
+ ip nhrp map multicast 10.11.85.98
+ ip nhrp network-id 85185
+ ip nhrp holdtime 300
+ ip nhrp nhs 10.10.10.1
+ ip nhrp shortcut
+ tunnel source Ethernet0/0
+ tunnel mode gre multipoint
+ tunnel key 85185
+ tunnel protection ipsec profile PROF-DMVPN-VTI
+ no shutdown
+
+
+router eigrp 1
+ no auto-summary
+ network 10.10.10.0 0.0.0.31
+ network 10.11.85.0 0.0.0.31
+
+end
+
+
+ ============================================================
+SPOKE2 
+
+
+enable
+configure terminal
+
+hostname SPOKE2
+
+interface Ethernet0/0
+ description WAN hacia ISP
+ ip address 10.11.85.106 255.255.255.252
+ no shutdown
+
+interface Ethernet0/1
+ description LAN hacia PC1
+ ip address 10.11.85.33 255.255.255.224
+ no shutdown
+
+ip route 0.0.0.0 0.0.0.0 10.11.85.105
+
+crypto ikev2 proposal PROP-DMVPN
+ encryption aes-cbc-256
+ integrity sha256
+ group 14
+
+
+crypto ikev2 policy POL-DMVPN
+ proposal PROP-DMVPN
+
+
+
+crypto ikev2 keyring KR-DMVPN
+ peer HUB
+  address 10.11.85.98
+  pre-shared-key ITLA2026
+ !
+
+
+crypto ikev2 profile PROF-DMVPN-IKEV2
+ match identity remote address 10.11.85.98 255.255.255.255
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local KR-DMVPN
+
+
+crypto ipsec transform-set TS-DMVPN-IKEV2 esp-aes 256 esp-sha256-hmac
+ mode transport
+
+crypto ipsec profile PROF-DMVPN-VTI
+ set transform-set TS-DMVPN-IKEV2
+ set ikev2-profile PROF-DMVPN-IKEV2
+
+
+
+interface Tunnel0
+ description DMVPN Fase3 - Spoke2
+ ip address 10.10.10.3 255.255.255.224
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication ITLA-DMVPN
+ ip nhrp map 10.10.10.1 10.11.85.98
+ ip nhrp map multicast 10.11.85.98
+ ip nhrp network-id 85185
+ ip nhrp holdtime 300
+ ip nhrp nhs 10.10.10.1
+ ip nhrp shortcut
+ tunnel source Ethernet0/0
+ tunnel mode gre multipoint
+ tunnel key 85185
+ tunnel protection ipsec profile PROF-DMVPN-VTI
+ no shutdown
+
+
+router eigrp 1
+ no auto-summary
+ network 10.10.10.0 0.0.0.31
+ network 10.11.85.32 0.0.0.31
+
+end
+
+
+
+ ============================================================
+ ISP
+ 
+enable
+configure terminal
+hostname ISP1
+ 
+interface Ethernet0/0
+ description Hacia HUB
+ ip address 10.11.85.97 255.255.255.252
+ no shutdown
+ 
+interface Ethernet0/1
+ description Hacia SPOKE1
+ ip address 10.11.85.101 255.255.255.252
+ no shutdown
+ 
+interface Ethernet0/2
+ description Hacia SPOKE2
+ ip address 10.11.85.105 255.255.255.252
+ no shutdown
+ 
+ip route 10.11.85.64 255.255.255.224 10.11.85.98
+ip route 10.11.85.0  255.255.255.224 10.11.85.102
+ip route 10.11.85.32 255.255.255.224 10.11.85.106
+ 
+end
+
+ 
+============================================================
+ VPCS
+============================================================
+ 
+PC4 (detrás de SPOKE2)
+ip 10.11.85.34 255.255.255.224 10.11.85.33
+save
+ 
+PC5 (detrás de SPOKE1)
+ip 10.11.85.2 255.255.255.224 10.11.85.1
+save
+ 
+PC6 (detrás de HUB)
+ip 10.11.85.66 255.255.255.224 10.11.85.65
+save
+ 
