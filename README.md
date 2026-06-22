@@ -314,11 +314,3 @@ ping 10.11.85.66     ! PC1 -> PC3
 ping 10.11.85.2      ! PC1 -> PC2 (spoke-to-spoke)
 
 
-
----
-
-
----
-
-*Documento generado para fines académicos — ITLA 2024-1185*
-
